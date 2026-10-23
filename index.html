@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Folio">
+<meta name="application-name" content="Folio">
+<meta name="description" content="Turn any PDF book into a beautiful, reflowable book you can read anywhere.">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Folio</title>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+
+<!-- ============ LIBRARY ============ -->
+<main id="library" class="view">
+  <header class="lib-head">
+    <div class="lib-titlebar">
+      <h1>Library</h1>
+      <div class="lib-actions">
+        <button class="icon-btn" id="sortBtn" aria-label="Sort">
+          <svg viewBox="0 0 24 24"><path d="M3 7h13M3 12h9M3 17h5M18 6v13m0 0-3-3m3 3 3-3"/></svg>
+        </button>
+        <button class="pill-btn primary" id="addBtn">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Add PDF</span>
+        </button>
+      </div>
+    </div>
+    <div class="seg" id="libFilter" role="tablist">
+      <button role="tab" data-f="all" class="on">All</button>
+      <button role="tab" data-f="reading">Reading</button>
+      <button role="tab" data-f="new">Want to Read</button>
+      <button role="tab" data-f="finished">Finished</button>
+    </div>
+  </header>
+
+  <section id="continue" class="continue" hidden></section>
+
+  <section id="shelf" class="shelf"></section>
+
+  <section id="empty" class="empty" hidden>
+    <div class="empty-art" aria-hidden="true">
+      <div class="eb b1"></div><div class="eb b2"></div><div class="eb b3"></div>
+    </div>
+    <h2>Your library is empty</h2>
+    <p>Add a PDF of any book. Folio pulls out the text and re-typesets it into clean, reflowable pages, with chapters, themes and fonts you choose.</p>
+    <button class="pill-btn primary big" id="emptyAdd">Choose a PDF</button>
+    <p class="hint">Everything stays on this device. Works offline.</p>
+  </section>
+
+  <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
+  <div id="dropOverlay" class="drop-overlay" hidden><div>Drop PDFs to add them</div></div>
+</main>
+
+<!-- ============ READER ============ -->
+<section id="reader" class="view" hidden>
+  <div class="r-chrome r-top">
+    <button class="r-btn" id="rClose" aria-label="Close book">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <button class="r-btn" id="rToc" aria-label="Contents">
+      <svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+    </button>
+    <div class="r-title" id="rTitle"></div>
+    <button class="r-btn" id="rAa" aria-label="Themes and settings"><span class="aa">A<small>A</small></span></button>
+    <button class="r-btn" id="rSearch" aria-label="Search book">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+    </button>
+    <button class="r-btn" id="rMark" aria-label="Bookmark page">
+      <svg viewBox="0 0 24 24"><path d="M7 3.5h10v17l-5-4-5 4z"/></svg>
+    </button>
+  </div>
+
+  <div class="r-runhead" id="rRunhead"></div>
+  <div class="r-ribbon" id="rRibbon" hidden></div>
+  <div class="r-stage" id="rStage">
+    <div class="r-viewport" id="rViewport">
+      <article class="r-content book" id="rContent"></article>
+    </div>
+  </div>
+  <div class="r-foot" id="rFoot"><span id="rFootLeft"></span><span id="rFootCenter"></span><span id="rFootRight"></span></div>
+
+  <div class="r-chrome r-bottom">
+    <div class="r-scrub-label" id="rScrubLabel"></div>
+    <input type="range" id="rScrub" min="0" max="1000" value="0" aria-label="Book position">
+    <div class="r-scrub-meta"><span id="rScrubLeft"></span><span id="rScrubRight"></span></div>
+  </div>
+
+  <div class="hl-menu" id="hlMenu" hidden>
+    <div class="hl-colors">
+      <button data-c="yellow" aria-label="Yellow"></button>
+      <button data-c="green" aria-label="Green"></button>
+      <button data-c="blue" aria-label="Blue"></button>
+      <button data-c="pink" aria-label="Pink"></button>
+      <button data-c="purple" aria-label="Purple"></button>
+      <button data-c="underline" aria-label="Underline"><u>U</u></button>
+    </div>
+    <div class="hl-acts">
+      <button data-a="note">Note</button>
+      <button data-a="copy">Copy</button>
+      <button data-a="delete" class="danger">Remove</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHEETS ============ -->
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="sheet" id="settingsSheet" role="dialog" aria-label="Themes and settings" hidden>
+  <div class="grabber"></div>
+  <div class="sheet-head"><h3>Themes &amp; Settings</h3><button class="close-x" data-close aria-label="Close">×</button></div>
+  <div class="set-row size-row">
+    <button class="size-btn" id="fsDown" aria-label="Smaller text"><span style="font-size:15px">A</span></button>
+    <div class="size-dots" id="fsDots"></div>
+    <button class="size-btn" id="fsUp" aria-label="Larger text"><span style="font-size:25px">A</span></button>
+  </div>
+  <div class="themes" id="themes"></div>
+  <label class="set-line"><span>Match iPad dark mode</span><input type="checkbox" class="switch" id="setAutoNight"></label>
+  <div class="set-group-title">Font</div>
+  <div class="fonts" id="fonts"></div>
+  <div class="set-group-title">Layout</div>
+  <label class="set-line"><span>Line spacing</span><input type="range" id="setLh" min="1.2" max="2.0" step="0.05"></label>
+  <label class="set-line"><span>Margins</span><input type="range" id="setMargin" min="0" max="2" step="1"></label>
+  <label class="set-line"><span>Justify text</span><input type="checkbox" class="switch" id="setJustify"></label>
+  <label class="set-line"><span>Two pages in landscape</span><input type="checkbox" class="switch" id="setSpread"></label>
+  <label class="set-line"><span>Scrolling view</span><input type="checkbox" class="switch" id="setScroll"></label>
+  <label class="set-line"><span>Page turn</span>
+    <select id="setTurn"><option value="slide">Slide</option><option value="fade">Fade</option><option value="none">None</option></select>
+  </label>
+  <label class="set-line"><span>Drop caps</span><input type="checkbox" class="switch" id="setDrop"></label>
+</div>
+
+<div class="sheet tall" id="tocSheet" role="dialog" aria-label="Contents" hidden>
+  <div class="grabber"></div>
+  <div class="toc-book" id="tocBook"></div>
+  <div class="seg small" id="tocTabs">
+    <button data-t="contents" class="on">Contents</button>
+    <button data-t="bookmarks">Bookmarks</button>
+    <button data-t="notes">Highlights</button>
+  </div>
+  <div class="toc-list" id="tocList"></div>
+</div>
+
+<div class="sheet tall" id="searchSheet" role="dialog" aria-label="Search" hidden>
+  <div class="grabber"></div>
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+    <input type="search" id="searchInput" placeholder="Search this book" autocomplete="off" enterkeyhint="search">
+    <button class="link-btn" data-close>Done</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<div class="sheet" id="importSheet" role="dialog" aria-label="Importing" hidden>
+  <div class="import-body">
+    <div class="import-cover" id="importCover"><div class="spinner"></div></div>
+    <div class="import-text">
+      <div class="import-name" id="importName"></div>
+      <div class="import-stage" id="importStage"></div>
+      <div class="bar"><i id="importBar"></i></div>
+    </div>
+  </div>
+  <div class="import-actions" id="importActions"></div>
+</div>
+
+<div class="sheet" id="dialogSheet" role="dialog" hidden>
+  <h3 id="dlgTitle"></h3>
+  <div id="dlgBody"></div>
+  <div class="dlg-actions" id="dlgActions"></div>
+</div>
+
+<div class="action-sheet" id="actionSheet" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<!-- offscreen measurer for whole-book page numbers -->
+<div class="measure-host" aria-hidden="true"><div class="r-viewport" id="mViewport"><article class="r-content book" id="mContent"></article></div></div>
+</body>
+</html>
