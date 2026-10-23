@@ -1,5 +1,5 @@
 // Offline support: the app shell is precached; vendor assets (cmaps, OCR data) are cached on first use.
-const VERSION = 'folio-v1';
+const VERSION = 'folio-v2';
 const SHELL = [
   './', 'index.html', 'css/app.css', 'manifest.webmanifest',
   'js/app.js', 'js/reader.js', 'js/db.js', 'js/importer.js', 'js/extract.js', 'js/layout.js', 'js/outline.js',

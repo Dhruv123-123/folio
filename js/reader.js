@@ -152,7 +152,10 @@ export class Reader {
       if (scroll) {
         Object.assign(c.style, { width: width + 'px', height: 'auto', columnCount: 'auto', columnWidth: 'auto', columnGap: 'normal', columnFill: 'auto', paddingTop: top + 'px' });
       } else {
-        Object.assign(c.style, { width: width + 'px', height: height + 'px', columnCount: spread ? '2' : '1', columnGap: gap + 'px', columnFill: 'auto', paddingTop: '0' });
+        // WebKit ignores `column-count: 1` (no multicol, so no extra pages), so single-page mode
+        // is set up with an explicit column width instead.
+        const colW = spread ? (width - gap) / 2 : width;
+        Object.assign(c.style, { width: width + 'px', height: height + 'px', columnCount: spread ? '2' : 'auto', columnWidth: colW + 'px', columnGap: gap + 'px', columnFill: 'auto', paddingTop: '0' });
       }
     }
     if (scroll) { this.el.vp.style.left = '0'; this.el.vp.style.width = vw + 'px'; this.el.content.style.margin = '0 auto'; }
